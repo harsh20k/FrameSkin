@@ -5,8 +5,9 @@ struct ContentView: View {
     @State private var selectedFrameImage: UIImage?
     @State private var frameImages: [UIImage] = []
     @State private var logs: [String] = []
+    @State private var drawings: [Int: [Path]] = [:] // Dictionary to store drawings for each frame
     @State private var currentDrawing: Path = Path()
-    @State private var drawings: [Path] = []
+    @State private var currentIndex: Int = 0 // Index of the current frame
 
     var body: some View {
         VStack {
@@ -26,8 +27,10 @@ struct ContentView: View {
 
                 // Drawing Canvas
                 Canvas { context, size in
-                    for drawing in drawings {
-                        context.stroke(drawing, with: .color(.white), lineWidth: 2)
+                    if let frameDrawings = drawings[currentIndex] {
+                        for drawing in frameDrawings {
+                            context.stroke(drawing, with: .color(.white), lineWidth: 2)
+                        }
                     }
                     context.stroke(currentDrawing, with: .color(.white), lineWidth: 2)
                 }
@@ -41,7 +44,7 @@ struct ContentView: View {
                                 }
                             }
                             .onEnded { value in
-                                drawings.append(currentDrawing)
+                                drawings[currentIndex, default: []].append(currentDrawing)
                                 currentDrawing = Path()
                             })
             }
@@ -56,6 +59,7 @@ struct ContentView: View {
                                 .frame(width: 60, height: 60)
                                 .onTapGesture {
                                     selectedFrameImage = frameImages[index]
+                                    currentIndex = index
                                     log("Frame \(index) selected")
                                 }
                         }
@@ -132,6 +136,7 @@ struct ContentView: View {
                     frameImages = images
                     if let firstImage = images.first {
                         selectedFrameImage = firstImage
+                        currentIndex = 0
                         log("Initial frame set for display")
                     } else {
                         log("No frames extracted")
@@ -153,5 +158,4 @@ struct ContentView: View {
         }
     }
 }
-
 
