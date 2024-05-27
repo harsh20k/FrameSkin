@@ -11,6 +11,7 @@
 		3A0175E12C04AF2600AF3D6F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0175E02C04AF2600AF3D6F /* ContentView.swift */; };
 		3A0175E32C04AF2800AF3D6F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175E22C04AF2800AF3D6F /* Assets.xcassets */; };
 		3A0175E62C04AF2800AF3D6F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175E52C04AF2800AF3D6F /* Preview Assets.xcassets */; };
+		3A0175F22C04DA1500AF3D6F /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175F12C04DA1500AF3D6F /* sample.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +20,8 @@
 		3A0175E02C04AF2600AF3D6F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3A0175E22C04AF2800AF3D6F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3A0175E52C04AF2800AF3D6F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		3A0175EE2C04BD3100AF3D6F /* dummy.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = dummy.md; sourceTree = "<group>"; };
+		3A0175F12C04DA1500AF3D6F /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,10 +54,12 @@
 		3A0175DD2C04AF2600AF3D6F /* FrameSkin */ = {
 			isa = PBXGroup;
 			children = (
+				3A0175F12C04DA1500AF3D6F /* sample.mp4 */,
 				3A0175DE2C04AF2600AF3D6F /* FrameSkinApp.swift */,
 				3A0175E02C04AF2600AF3D6F /* ContentView.swift */,
 				3A0175E22C04AF2800AF3D6F /* Assets.xcassets */,
 				3A0175E42C04AF2800AF3D6F /* Preview Content */,
+				3A0175EE2C04BD3100AF3D6F /* dummy.md */,
 			);
 			path = FrameSkin;
 			sourceTree = "<group>";
@@ -126,6 +131,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3A0175E62C04AF2800AF3D6F /* Preview Assets.xcassets in Resources */,
+				3A0175F22C04DA1500AF3D6F /* sample.mp4 in Resources */,
 				3A0175E32C04AF2800AF3D6F /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
