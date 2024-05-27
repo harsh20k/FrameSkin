@@ -5,20 +5,42 @@ struct ContentView: View {
     @State private var selectedFrameImage: UIImage?
     @State private var frameImages: [UIImage] = []
     @State private var logs: [String] = []
+    @State private var currentDrawing: Path = Path()
+    @State private var drawings: [Path] = []
 
     var body: some View {
         VStack {
             Spacer()
-            if let selectedFrameImage = selectedFrameImage {
-                Image(uiImage: selectedFrameImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 600, height: 600)
-            } else {
-                Text("Loading...")
-                    .onAppear {
-                        extractFrames()
+            ZStack {
+                if let selectedFrameImage = selectedFrameImage {
+                    Image(uiImage: selectedFrameImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 600, height: 600)
+                } else {
+                    Text("Loading...")
+                        .onAppear {
+                            extractFrames()
+                        }
+                }
+
+                // Drawing Canvas
+                Canvas { context, size in
+                    for drawing in drawings {
+                        context.stroke(drawing, with: .color(.white), lineWidth: 2)
                     }
+                    context.stroke(currentDrawing, with: .color(.white), lineWidth: 2)
+                }
+                .frame(width: 600, height: 600)
+                .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                            .onChanged { value in
+                                currentDrawing.move(to: value.location)
+                                currentDrawing.addLine(to: value.location)
+                            }
+                            .onEnded { value in
+                                drawings.append(currentDrawing)
+                                currentDrawing = Path()
+                            })
             }
 
             if !frameImages.isEmpty {
@@ -82,7 +104,7 @@ struct ContentView: View {
                     log("Frame rate loaded: \(frameRate) fps")
                 }
 
-                let frameCount = 300
+                let frameCount = 5
                 let frameDuration = CMTime(value: 1, timescale: CMTimeScale(frameRate))
                 let times: [NSValue] = (0..<frameCount).map { i in
                     let time = CMTimeMultiply(frameDuration, multiplier: Int32(i))
