@@ -34,8 +34,11 @@ struct ContentView: View {
                 .frame(width: 600, height: 600)
                 .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local)
                             .onChanged { value in
-                                currentDrawing.move(to: value.location)
-                                currentDrawing.addLine(to: value.location)
+                                if currentDrawing.isEmpty {
+                                    currentDrawing.move(to: value.location)
+                                } else {
+                                    currentDrawing.addLine(to: value.location)
+                                }
                             }
                             .onEnded { value in
                                 drawings.append(currentDrawing)
@@ -150,4 +153,5 @@ struct ContentView: View {
         }
     }
 }
+
 
