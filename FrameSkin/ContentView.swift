@@ -5,9 +5,11 @@ struct ContentView: View {
     @State private var selectedFrameImage: UIImage?
     @State private var frameImages: [UIImage] = []
     @State private var logs: [String] = []
-    @State private var drawings: [Int: [Path]] = [:] // Dictionary to store drawings for each frame
+    @State private var drawings: [Int: [Path]] = [:]
     @State private var currentDrawing: Path = Path()
-    @State private var currentIndex: Int = 0 // Index of the current frame
+    @State private var currentIndex: Int = 0
+    @State private var isPlaying: Bool = false
+    @State private var timer: Timer?
 
     var body: some View {
         VStack {
@@ -81,6 +83,28 @@ struct ContentView: View {
             .background(Color.black)
             .padding(.top, 10)
         }
+        .overlay(
+            VStack {
+                Spacer()
+                Button(action: {
+                    isPlaying.toggle()
+                    if isPlaying {
+                        startAnimation()
+                    } else {
+                        stopAnimation()
+                    }
+                }) {
+                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .padding()
+                        .background(Color.white)
+                        .clipShape(Circle())
+                }
+                .padding()
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+        )
     }
 
     private func extractFrames() {
@@ -111,7 +135,7 @@ struct ContentView: View {
                     log("Frame rate loaded: \(frameRate) fps")
                 }
 
-                let frameCount = 5
+                let frameCount = 30
                 let frameDuration = CMTime(value: 1, timescale: CMTimeScale(frameRate))
                 let times: [NSValue] = (0..<frameCount).map { i in
                     let time = CMTimeMultiply(frameDuration, multiplier: Int32(i))
@@ -151,6 +175,18 @@ struct ContentView: View {
         }
     }
     
+    private func startAnimation() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { _ in
+            currentIndex = (currentIndex + 1) % frameImages.count
+            selectedFrameImage = frameImages[currentIndex]
+        }
+    }
+
+    private func stopAnimation() {
+        timer?.invalidate()
+        timer = nil
+    }
+
     private func log(_ message: String) {
         DispatchQueue.main.async {
             logs.append(message)
@@ -158,4 +194,5 @@ struct ContentView: View {
         }
     }
 }
+
 
