@@ -59,6 +59,7 @@ struct ContentView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 60, height: 60)
+                                .shadow(color: currentIndex == index ? .white : .clear, radius: 20)
                                 .onTapGesture {
                                     selectedFrameImage = frameImages[index]
                                     currentIndex = index
@@ -194,5 +195,4 @@ struct ContentView: View {
         }
     }
 }
-
 
