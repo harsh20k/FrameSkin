@@ -189,7 +189,7 @@ struct ContentView: View {
     }
     
     private func saveDrawing() {
-        if let drawingData = try? JSONEncoder().encode(currentDrawing), let firstProject = realmManager.projects.first {
+        if let drawingData = try? NSKeyedArchiver.archivedData(withRootObject: drawings[currentIndex] ?? [], requiringSecureCoding: false), let firstProject = realmManager.projects.first {
             realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentIndex)
         }
     }
@@ -211,67 +211,6 @@ struct ContentView: View {
             logs.append(message)
             print(message)  // Also print to console for debugging
         }
-    }
-}
-
-
-
-struct Drawing: Codable {
-    var lines: [Line] = []
-    
-    mutating func addPoint(_ point: CGPoint) {
-        if lines.isEmpty {
-            lines.append(Line(points: [point]))
-        } else {
-            lines[lines.count - 1].points.append(point)
-        }
-    }
-}
-
-struct Line: Codable {
-    var points: [CGPoint]
-    var color: Color = .black
-    var lineWidth: CGFloat = 2.0
-    
-    enum CodingKeys: String, CodingKey {
-        case points
-        case color
-        case lineWidth
-    }
-    
-    init(points: [CGPoint], color: Color = .black, lineWidth: CGFloat = 2.0) {
-        self.points = points
-        self.color = color
-        self.lineWidth = lineWidth
-    }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        points = try container.decode([CGPoint].self, forKey: .points)
-        color = try container.decode(Color.self, forKey: .color)
-        lineWidth = try container.decode(CGFloat.self, forKey: .lineWidth)
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(points, forKey: .points)
-        try container.encode(color, forKey: .color)
-        try container.encode(lineWidth, forKey: .lineWidth)
-    }
-}
-
-extension CGPoint: Codable {
-    public init(from decoder: Decoder) throws {
-        var container = try decoder.unkeyedContainer()
-        let x = try container.decode(CGFloat.self)
-        let y = try container.decode(CGFloat.self)
-        self.init(x: x, y: y)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.unkeyedContainer()
-        try container.encode(x)
-        try container.encode(y)
     }
 }
 
