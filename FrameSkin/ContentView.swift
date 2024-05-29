@@ -132,32 +132,40 @@ struct ContentView: View {
 
                 var frameRate: Double = 30.0
                 if let videoTrack = tracks.first(where: { $0.mediaType == .video }) {
-                    frameRate = Double(videoTrack.nominalFrameRate)
+                    do {
+                        frameRate = try await Double(videoTrack.load(.nominalFrameRate))
+                    }
+                    catch{
+                        print("error")
+                    }
+
                     log("Frame rate loaded: \(frameRate) fps")
                 }
 
                 let frameCount = 30
                 let frameDuration = CMTime(value: 1, timescale: CMTimeScale(frameRate))
-                let times: [NSValue] = (0..<frameCount).map { i in
-                    let time = CMTimeMultiply(frameDuration, multiplier: Int32(i))
-                    return NSValue(time: time)
-                }
+
 
                 log("Extracting \(frameCount) frames")
 
-                var images: [UIImage] = []
-                for time in times {
-                    do {
-                        let cgImage = try assetImageGenerator.copyCGImage(at: time.timeValue, actualTime: nil)
-                        let uiImage = UIImage(cgImage: cgImage)
-                        images.append(uiImage)
-                        log("Frame extracted at time: \(time.timeValue.seconds)")
-                    } catch {
-                        log("Error extracting frame at time \(time.timeValue.seconds): \(error)")
-                    }
-                }
+
 
                 DispatchQueue.main.async {
+                    let times: [NSValue] = (0..<frameCount).map { i in
+                        let time = CMTimeMultiply(frameDuration, multiplier: Int32(i))
+                        return NSValue(time: time)
+                    }
+                    var images: [UIImage] = []
+                    for time in times {
+                        do {
+                            let cgImage = try assetImageGenerator.copyCGImage(at: time.timeValue, actualTime: nil)
+                            let uiImage = UIImage(cgImage: cgImage)
+                            images.append(uiImage)
+                            log("Frame extracted at time: \(time.timeValue.seconds)")
+                        } catch {
+                            log("Error extracting frame at time \(time.timeValue.seconds): \(error)")
+                        }
+                    }
                     frameImages = images
                     if let firstImage = images.first {
                         selectedFrameImage = firstImage
@@ -177,7 +185,7 @@ struct ContentView: View {
     }
     
     private func startAnimation() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 3.0 / 30.0, repeats: true) { _ in
             currentIndex = (currentIndex + 1) % frameImages.count
             selectedFrameImage = frameImages[currentIndex]
         }
