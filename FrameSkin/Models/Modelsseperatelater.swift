@@ -66,7 +66,7 @@ class FrameSkinFrame: Object, Identifiable {
     
     @Persisted(primaryKey: true) var id: ObjectId
     @Persisted var frameIndex: Int
-    @Persisted var frameData: Data
+    @Persisted var frameData: Data?
     @Persisted var drawingData: Data?
     
     override class func primaryKey() -> String? {

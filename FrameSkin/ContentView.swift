@@ -25,7 +25,7 @@ struct ContentView: View {
                 } else {
                     Text("Loading...")
                         .onAppear {
-                            extractFrames()
+                            loadFrames()
                         }
                 }
 
@@ -111,7 +111,33 @@ struct ContentView: View {
         )
     }
 
+    private func loadFrames() {
+        log("Loading frames...")
+        guard let project = realmManager.projects.first, let scene = project.scenes.first else {
+            log("No project or scene found")
+            return
+        }
+
+        if let videoTrack = scene.tracks.first(where: { $0.type == .video }) {
+            log("Video track found")
+            if videoTrack.frames.isEmpty {
+                log("Video track found but contains no frames, extracting frames...")
+                extractFrames()
+            } else {
+                log("Loading frames from existing video track")
+                frameImages = videoTrack.frames.compactMap { UIImage(data: $0.frameData ?? Data()) }
+                selectedFrameImage = frameImages.first
+                currentIndex = 0
+                log("Loaded \(frameImages.count) frames from existing video track")
+            }
+        } else {
+            log("No video track found, extracting frames...")
+            extractFrames()
+        }
+    }
+
     private func extractFrames() {
+        log("Extracting frames from video...")
         guard let url = Bundle.main.url(forResource: "sample", withExtension: "mp4") else {
             log("Video file not found")
             return
@@ -135,23 +161,14 @@ struct ContentView: View {
 
                 var frameRate: Double = 30.0
                 if let videoTrack = tracks.first(where: { $0.mediaType == .video }) {
-                    do {
-                        frameRate = try await Double(videoTrack.load(.nominalFrameRate))
-                    }
-                    catch{
-                        print("error")
-                    }
-
+                    frameRate = try await Double(videoTrack.load(.nominalFrameRate))
                     log("Frame rate loaded: \(frameRate) fps")
                 }
 
                 let frameCount = 30
                 let frameDuration = CMTime(value: 1, timescale: CMTimeScale(frameRate))
 
-
                 log("Extracting \(frameCount) frames")
-
-
 
                 DispatchQueue.main.async {
                     let times: [NSValue] = (0..<frameCount).map { i in
@@ -189,12 +206,15 @@ struct ContentView: View {
     }
     
     private func saveDrawing() {
+        log("Saving drawing...")
         if let drawingData = try? NSKeyedArchiver.archivedData(withRootObject: drawings[currentIndex] ?? [], requiringSecureCoding: false), let firstProject = realmManager.projects.first {
             realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentIndex)
+            log("Drawing saved for frame \(currentIndex)")
         }
     }
     
     private func startAnimation() {
+        log("Starting animation...")
         timer = Timer.scheduledTimer(withTimeInterval: 3.0 / 30.0, repeats: true) { _ in
             currentIndex = (currentIndex + 1) % frameImages.count
             selectedFrameImage = frameImages[currentIndex]
@@ -202,6 +222,7 @@ struct ContentView: View {
     }
 
     private func stopAnimation() {
+        log("Stopping animation...")
         timer?.invalidate()
         timer = nil
     }
