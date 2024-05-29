@@ -12,7 +12,24 @@
 		3A0175E32C04AF2800AF3D6F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175E22C04AF2800AF3D6F /* Assets.xcassets */; };
 		3A0175E62C04AF2800AF3D6F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175E52C04AF2800AF3D6F /* Preview Assets.xcassets */; };
 		3A0175F22C04DA1500AF3D6F /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175F12C04DA1500AF3D6F /* sample.mp4 */; };
+		3AE164442C07C4350089443A /* Modelsseperatelater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE164432C07C4350089443A /* Modelsseperatelater.swift */; };
+		3AE1645E2C07CFC20089443A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3AE1645D2C07CFC20089443A /* RealmSwift */; };
+		3AE1645F2C07CFCA0089443A /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 3AE1645D2C07CFC20089443A /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3AE164562C07CE5E0089443A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				3AE1645F2C07CFCA0089443A /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3A0175DB2C04AF2600AF3D6F /* FrameSkin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FrameSkin.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -22,6 +39,7 @@
 		3A0175E52C04AF2800AF3D6F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3A0175EE2C04BD3100AF3D6F /* dummy.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = dummy.md; sourceTree = "<group>"; };
 		3A0175F12C04DA1500AF3D6F /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
+		3AE164432C07C4350089443A /* Modelsseperatelater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modelsseperatelater.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3AE1645E2C07CFC20089443A /* RealmSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,6 +73,7 @@
 		3A0175DD2C04AF2600AF3D6F /* FrameSkin */ = {
 			isa = PBXGroup;
 			children = (
+				3AE164422C07C3F90089443A /* Models */,
 				3A0175F12C04DA1500AF3D6F /* sample.mp4 */,
 				3A0175DE2C04AF2600AF3D6F /* FrameSkinApp.swift */,
 				3A0175E02C04AF2600AF3D6F /* ContentView.swift */,
@@ -72,6 +92,14 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		3AE164422C07C3F90089443A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3AE164432C07C4350089443A /* Modelsseperatelater.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -82,12 +110,16 @@
 				3A0175D72C04AF2600AF3D6F /* Sources */,
 				3A0175D82C04AF2600AF3D6F /* Frameworks */,
 				3A0175D92C04AF2600AF3D6F /* Resources */,
+				3AE164562C07CE5E0089443A /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = FrameSkin;
+			packageProductDependencies = (
+				3AE1645D2C07CFC20089443A /* RealmSwift */,
+			);
 			productName = FrameSkin;
 			productReference = 3A0175DB2C04AF2600AF3D6F /* FrameSkin.app */;
 			productType = "com.apple.product-type.application";
@@ -116,6 +148,9 @@
 				Base,
 			);
 			mainGroup = 3A0175D22C04AF2600AF3D6F;
+			packageReferences = (
+				3AE1645C2C07CFC20089443A /* XCRemoteSwiftPackageReference "realm-swift" */,
+			);
 			productRefGroup = 3A0175DC2C04AF2600AF3D6F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -145,6 +180,7 @@
 			files = (
 				3A0175E12C04AF2600AF3D6F /* ContentView.swift in Sources */,
 				3A0175DF2C04AF2600AF3D6F /* FrameSkinApp.swift in Sources */,
+				3AE164442C07C4350089443A /* Modelsseperatelater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,6 +386,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3AE1645C2C07CFC20089443A /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3AE1645D2C07CFC20089443A /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3AE1645C2C07CFC20089443A /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3A0175D32C04AF2600AF3D6F /* Project object */;
 }
