@@ -15,6 +15,7 @@
 		3AE164442C07C4350089443A /* Modelsseperatelater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE164432C07C4350089443A /* Modelsseperatelater.swift */; };
 		3AE1645E2C07CFC20089443A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3AE1645D2C07CFC20089443A /* RealmSwift */; };
 		3AE1645F2C07CFCA0089443A /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 3AE1645D2C07CFC20089443A /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3AE164612C07E0BC0089443A /* RealmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE164602C07E0BC0089443A /* RealmManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -40,6 +41,7 @@
 		3A0175EE2C04BD3100AF3D6F /* dummy.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = dummy.md; sourceTree = "<group>"; };
 		3A0175F12C04DA1500AF3D6F /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
 		3AE164432C07C4350089443A /* Modelsseperatelater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modelsseperatelater.swift; sourceTree = "<group>"; };
+		3AE164602C07E0BC0089443A /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +98,7 @@
 			isa = PBXGroup;
 			children = (
 				3AE164432C07C4350089443A /* Modelsseperatelater.swift */,
+				3AE164602C07E0BC0089443A /* RealmManager.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -179,6 +182,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3A0175E12C04AF2600AF3D6F /* ContentView.swift in Sources */,
+				3AE164612C07E0BC0089443A /* RealmManager.swift in Sources */,
 				3A0175DF2C04AF2600AF3D6F /* FrameSkinApp.swift in Sources */,
 				3AE164442C07C4350089443A /* Modelsseperatelater.swift in Sources */,
 			);

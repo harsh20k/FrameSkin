@@ -1,206 +1,184 @@
 import SwiftUI
-import AVFoundation
+import RealmSwift
 
 struct ContentView: View {
-    @State private var selectedFrameImage: UIImage?
-    @State private var frameImages: [UIImage] = []
-    @State private var logs: [String] = []
-    @State private var drawings: [Int: [Path]] = [:]
-    @State private var currentDrawing: Path = Path()
-    @State private var currentIndex: Int = 0
-    @State private var isPlaying: Bool = false
-    @State private var timer: Timer?
-
-    var body: some View {
-        VStack {
-            Spacer()
-            ZStack {
-                if let selectedFrameImage = selectedFrameImage {
-                    Image(uiImage: selectedFrameImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 600, height: 600)
-                } else {
-                    Text("Loading...")
-                        .onAppear {
-                            extractFrames()
-                        }
-                }
-
-                // Drawing Canvas
-                Canvas { context, size in
-                    if let frameDrawings = drawings[currentIndex] {
-                        for drawing in frameDrawings {
-                            context.stroke(drawing, with: .color(.white), lineWidth: 2)
-                        }
-                    }
-                    context.stroke(currentDrawing, with: .color(.white), lineWidth: 2)
-                }
-                .frame(width: 600, height: 600)
-                .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local)
-                            .onChanged { value in
-                                if currentDrawing.isEmpty {
-                                    currentDrawing.move(to: value.location)
-                                } else {
-                                    currentDrawing.addLine(to: value.location)
-                                }
-                            }
-                            .onEnded { value in
-                                drawings[currentIndex, default: []].append(currentDrawing)
-                                currentDrawing = Path()
-                            })
-            }
-
-            if !frameImages.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(frameImages.indices, id: \.self) { index in
-                            Image(uiImage: frameImages[index])
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 60, height: 60)
-                                .shadow(color: currentIndex == index ? .white : .clear, radius: 20)
-                                .onTapGesture {
-                                    selectedFrameImage = frameImages[index]
-                                    currentIndex = index
-                                    log("Frame \(index) selected")
-                                }
-                        }
-                    }
-                    .padding()
-                }
-            }
-            Spacer()
-            ScrollView {
-                VStack(alignment: .leading) {
-                    ForEach(logs, id: \.self) { log in
-                        Text(log)
-                            .foregroundColor(.white)
-                            .font(.footnote)
-                    }
-                }
-            }
-            .frame(maxHeight: 100)
-            .background(Color.black)
-            .padding(.top, 10)
-        }
-        .overlay(
-            VStack {
-                Spacer()
-                Button(action: {
-                    isPlaying.toggle()
-                    if isPlaying {
-                        startAnimation()
-                    } else {
-                        stopAnimation()
-                    }
-                }) {
-                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .padding()
-                        .background(Color.white)
-                        .clipShape(Circle())
-                }
-                .padding()
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-        )
-    }
-
-    private func extractFrames() {
-        guard let url = Bundle.main.url(forResource: "sample", withExtension: "mp4") else {
-            log("Video file not found")
-            return
-        }
-        
-        log("Video file found: \(url)")
-
-        let asset = AVAsset(url: url)
-        let assetImageGenerator = AVAssetImageGenerator(asset: asset)
-        assetImageGenerator.appliesPreferredTrackTransform = true
-        assetImageGenerator.maximumSize = CGSize(width: 300, height: 300) // Scale down the image size
-        assetImageGenerator.requestedTimeToleranceBefore = .zero
-        assetImageGenerator.requestedTimeToleranceAfter = .zero
-
-        Task {
-            do {
-                let duration = try await asset.load(.duration)
-                let tracks = try await asset.load(.tracks)
-                
-                log("Duration loaded: \(CMTimeGetSeconds(duration)) seconds")
-
-                var frameRate: Double = 30.0
-                if let videoTrack = tracks.first(where: { $0.mediaType == .video }) {
-                    do {
-                        frameRate = try await Double(videoTrack.load(.nominalFrameRate))
-                    }
-                    catch{
-                        print("error")
-                    }
-
-                    log("Frame rate loaded: \(frameRate) fps")
-                }
-
-                let frameCount = 30
-                let frameDuration = CMTime(value: 1, timescale: CMTimeScale(frameRate))
-
-
-                log("Extracting \(frameCount) frames")
-
-
-
-                DispatchQueue.main.async {
-                    let times: [NSValue] = (0..<frameCount).map { i in
-                        let time = CMTimeMultiply(frameDuration, multiplier: Int32(i))
-                        return NSValue(time: time)
-                    }
-                    var images: [UIImage] = []
-                    for time in times {
-                        do {
-                            let cgImage = try assetImageGenerator.copyCGImage(at: time.timeValue, actualTime: nil)
-                            let uiImage = UIImage(cgImage: cgImage)
-                            images.append(uiImage)
-                            log("Frame extracted at time: \(time.timeValue.seconds)")
-                        } catch {
-                            log("Error extracting frame at time \(time.timeValue.seconds): \(error)")
-                        }
-                    }
-                    frameImages = images
-                    if let firstImage = images.first {
-                        selectedFrameImage = firstImage
-                        currentIndex = 0
-                        log("Initial frame set for display")
-                    } else {
-                        log("No frames extracted")
-                    }
-                    let totalSizeInBytes = images.reduce(0) { $0 + ($1.jpegData(compressionQuality: 1)?.count ?? 0) }
-                    let totalSizeInMB = Double(totalSizeInBytes) / 1_048_576
-                    log("Total size of image collection: \(String(format: "%.2f", totalSizeInMB)) MB")
-                }
-            } catch {
-                log("Error loading asset properties: \(error)")
-            }
-        }
-    }
+    @StateObject private var realmManager = RealmManager()
     
-    private func startAnimation() {
-        timer = Timer.scheduledTimer(withTimeInterval: 3.0 / 30.0, repeats: true) { _ in
-            currentIndex = (currentIndex + 1) % frameImages.count
-            selectedFrameImage = frameImages[currentIndex]
-        }
-    }
-
-    private func stopAnimation() {
-        timer?.invalidate()
-        timer = nil
-    }
-
-    private func log(_ message: String) {
-        DispatchQueue.main.async {
-            logs.append(message)
-            print(message)  // Also print to console for debugging
+    var body: some View {
+        NavigationView {
+            List {
+                ForEach(realmManager.projects, id: \.self) { project in
+                    NavigationLink(destination: ProjectDetailView(project: project)) {
+                        Text(project.title)
+                    }
+                }
+            }
+            .navigationTitle("Projects")
         }
     }
 }
 
+struct ProjectDetailView: View {
+    @ObservedRealmObject var project: FrameSkinProject
+    
+    var body: some View {
+        VStack {
+            Text(project.title)
+                .font(.title)
+            List {
+                ForEach(project.scenes, id: \.self) { scene in
+                    SceneRowView(scene: scene)
+                }
+            }
+        }
+        .navigationTitle("Project Detail")
+    }
+}
+
+struct SceneRowView: View {
+    @ObservedRealmObject var scene: FrameSkinScene
+    @State private var selectedFrame: FrameSkinFrame?
+    
+    var body: some View {
+        VStack {
+            Text(scene.title)
+            List {
+                ForEach(scene.tracks, id: \.self) { track in
+                    TrackRowView(track: track, selectedFrame: $selectedFrame)
+                }
+            }
+            if let frame = selectedFrame {
+                DrawingView(frame: frame)
+            }
+        }
+    }
+}
+
+struct TrackRowView: View {
+    @ObservedRealmObject var track: FrameSkinTrack
+    @Binding var selectedFrame: FrameSkinFrame?
+    
+    var body: some View {
+        VStack {
+            Text(track.title)
+            if track.type == .video {
+                ScrollView(.horizontal) {
+                    HStack {
+                        ForEach(track.frames, id: \.self) { frame in
+                            Image(uiImage: UIImage(data: frame.frameData) ?? UIImage())
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .onTapGesture {
+                                    selectedFrame = frame
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct DrawingView: View {
+    @ObservedRealmObject var frame: FrameSkinFrame
+    @State private var currentDrawing: Drawing = Drawing()
+    
+    var body: some View {
+        VStack {
+            Text("Drawing on Frame \(frame.frameIndex)")
+            Canvas { context, size in
+                for line in currentDrawing.lines {
+                    var path = Path()
+                    path.addLines(line.points)
+                    context.stroke(path, with: .color(line.color), lineWidth: line.lineWidth)
+                }
+            }
+            .gesture(DragGesture(minimumDistance: 0.1)
+                .onChanged { value in
+                    let newPoint = value.location
+                    currentDrawing.addPoint(newPoint)
+                }
+                .onEnded { _ in
+                    saveDrawing()
+                })
+        }
+    }
+    
+    private func saveDrawing() {
+        // Convert currentDrawing to Data and save to frame.drawingData
+        if let drawingData = try? JSONEncoder().encode(currentDrawing) {
+            try? frame.realm?.write {
+                frame.drawingData = drawingData
+            }
+        }
+    }
+}
+
+struct Drawing: Codable {
+    var lines: [Line] = []
+    
+    mutating func addPoint(_ point: CGPoint) {
+        if lines.isEmpty {
+            lines.append(Line(points: [point]))
+        } else {
+            lines[lines.count - 1].points.append(point)
+        }
+    }
+}
+
+struct Line: Codable {
+    var points: [CGPoint]
+    var color: Color = .black
+    var lineWidth: CGFloat = 2.0
+    
+    enum CodingKeys: String, CodingKey {
+        case points
+        case color
+        case lineWidth
+    }
+    
+    init(points: [CGPoint], color: Color = .black, lineWidth: CGFloat = 2.0) {
+        self.points = points
+        self.color = color
+        self.lineWidth = lineWidth
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        points = try container.decode([CGPoint].self, forKey: .points)
+        color = try container.decode(Color.self, forKey: .color)
+        lineWidth = try container.decode(CGFloat.self, forKey: .lineWidth)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(points, forKey: .points)
+        try container.encode(color, forKey: .color)
+        try container.encode(lineWidth, forKey: .lineWidth)
+    }
+}
+
+extension CGPoint: Codable {
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        let x = try container.decode(CGFloat.self)
+        let y = try container.decode(CGFloat.self)
+        self.init(x: x, y: y)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        try container.encode(x)
+        try container.encode(y)
+    }
+}
+
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
