@@ -78,20 +78,40 @@ extension CGPoint {
         var data = Data()
         var x = self.x.bitPattern.littleEndian
         var y = self.y.bitPattern.littleEndian
-        data.append(Data(bytes: &x, count: MemoryLayout<UInt64>.size))
-        data.append(Data(bytes: &y, count: MemoryLayout<UInt64>.size))
+        withUnsafeBytes(of: &x) { buffer in
+            data.append(buffer.bindMemory(to: UInt8.self))
+        }
+        withUnsafeBytes(of: &y) { buffer in
+            data.append(buffer.bindMemory(to: UInt8.self))
+        }
         return data
     }
     
     init(data: Data) {
-        self.init()
-        let x = data[data.startIndex..<data.startIndex + MemoryLayout<UInt64>.size].withUnsafeBytes {
-            $0.load(as: UInt64.self)
-        }.littleEndian
-        let y = data[data.startIndex + MemoryLayout<UInt64>.size..<data.startIndex + 2 * MemoryLayout<UInt64>.size].withUnsafeBytes {
-            $0.load(as: UInt64.self)
-        }.littleEndian
-        self.x = CGFloat(bitPattern: x)
-        self.y = CGFloat(bitPattern: y)
+        self.init() // Initialize the CGPoint instance
+
+        
+        // Ensure the data contains at least 16 bytes (8 bytes for each coordinate)
+        guard data.count >= 2 * MemoryLayout<UInt64>.size else {
+            fatalError("Data is not large enough to contain two UInt64 values.")
+        }
+        
+        let x: UInt64 = data.withUnsafeBytes { $0.load(fromByteOffset: 0, as: UInt64.self) }
+        let y: UInt64 = data.withUnsafeBytes { $0.load(fromByteOffset: MemoryLayout<UInt64>.size, as: UInt64.self) }
+
+        
+        // Convert UInt64 to CGFloat properly
+        self.x = CGFloat(bitPattern: x.littleEndian)
+        self.y = CGFloat(bitPattern: y.littleEndian)
+    }
+}
+
+extension CGFloat {
+    init(bitPattern: UInt64) {
+        if MemoryLayout<CGFloat>.size == MemoryLayout<Double>.size {
+            self.init(Double(bitPattern: bitPattern))
+        } else {
+            self.init(Float(bitPattern: UInt32(bitPattern & 0xFFFFFFFF)))
+        }
     }
 }
