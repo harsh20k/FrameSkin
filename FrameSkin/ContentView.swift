@@ -168,7 +168,7 @@ struct ContentView: View {
                     log("Frame rate loaded: \(frameRate) fps")
                 }
 
-                let frameCount = 30
+                let frameCount = 5
                 let frameDuration = CMTime(value: 1, timescale: CMTimeScale(frameRate))
 
                 log("Extracting \(frameCount) frames")
