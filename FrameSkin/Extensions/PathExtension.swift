@@ -28,6 +28,7 @@ extension Path {
             case .closeSubpath:
                 var type: UInt8 = 4
                 data.append(&type, count: 1)
+            @unknown default:
                 break
             }
         }
@@ -75,17 +76,21 @@ extension Path {
 extension CGPoint {
     func toData() -> Data {
         var data = Data()
-        var x = self.x.bitPattern
-        var y = self.y.bitPattern
-        data.append(&x, count: 8)
-        data.append(&y, count: 8)
+        var x = self.x.bitPattern.littleEndian
+        var y = self.y.bitPattern.littleEndian
+        data.append(Data(bytes: &x, count: MemoryLayout<UInt64>.size))
+        data.append(Data(bytes: &y, count: MemoryLayout<UInt64>.size))
         return data
     }
     
     init(data: Data) {
         self.init()
-        let x = data.withUnsafeBytes { $0.load(as: UInt64.self) }
-        let y = data.withUnsafeBytes { $0.load(as: UInt64.self) }
+        let x = data[data.startIndex..<data.startIndex + MemoryLayout<UInt64>.size].withUnsafeBytes {
+            $0.load(as: UInt64.self)
+        }.littleEndian
+        let y = data[data.startIndex + MemoryLayout<UInt64>.size..<data.startIndex + 2 * MemoryLayout<UInt64>.size].withUnsafeBytes {
+            $0.load(as: UInt64.self)
+        }.littleEndian
         self.x = CGFloat(bitPattern: x)
         self.y = CGFloat(bitPattern: y)
     }

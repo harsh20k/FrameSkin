@@ -75,7 +75,7 @@ class RealmManager: ObservableObject {
     }
     
     func addDrawingDataToTrack(drawingData: Data, frameIndex: Int) {
-        log("Adding drawing data to track...")
+        log("Adding drawing data to track for frame \(frameIndex)...")
         guard let project = projects.first,
               let scene = project.scenes.first,
               let drawingTrack = scene.tracks.first(where: { $0.type == .drawing }) else {
@@ -86,16 +86,16 @@ class RealmManager: ObservableObject {
         if let frame = drawingTrack.frames.first(where: { $0.frameIndex == frameIndex }) {
             try! realm.write {
                 frame.drawingData = drawingData
+                log("Drawing data updated for frame \(frameIndex)")
             }
-            log("Drawing data updated for frame \(frameIndex)")
         } else {
             let frame = FrameSkinFrame()
             frame.frameIndex = frameIndex
             frame.drawingData = drawingData
             try! realm.write {
                 drawingTrack.frames.append(frame)
+                log("Drawing data added for frame \(frameIndex)")
             }
-            log("Drawing data added for frame \(frameIndex)")
         }
     }
     

@@ -214,13 +214,9 @@ struct ContentView: View {
             log("No drawing to save for frame \(currentIndex)")
             return
         }
-        do {
-            let drawingData = try NSKeyedArchiver.archivedData(withRootObject: drawingPath, requiringSecureCoding: false)
-            realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentIndex)
-            log("Drawing saved for frame \(currentIndex)")
-        } catch {
-            log("Failed to save drawing for frame \(currentIndex): \(error)")
-        }
+        let drawingData = drawingPath.toData()
+        realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentIndex)
+        log("Drawing saved for frame \(currentIndex)")
     }
 
     private func loadDrawings(for frameIndex: Int) {
@@ -234,16 +230,8 @@ struct ContentView: View {
         }
 
         if let drawingData = frame.drawingData {
-            do {
-                if let path = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(drawingData) as? Path {
-                    drawings[frameIndex] = path
-                    log("Loaded drawing for frame \(frameIndex)")
-                } else {
-                    log("Failed to unarchive drawing for frame \(frameIndex)")
-                }
-            } catch {
-                log("Error unarchiving drawing for frame \(frameIndex): \(error)")
-            }
+            drawings[frameIndex] = Path(data: drawingData)
+            log("Loaded drawing for frame \(frameIndex)")
         } else {
             log("No drawing data found for frame \(frameIndex)")
         }
@@ -271,5 +259,4 @@ struct ContentView: View {
         }
     }
 }
-
 
