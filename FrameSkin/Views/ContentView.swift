@@ -71,7 +71,7 @@ struct ContentView: View {
         }
         
         let frameExtractor = FrameExtractor(videoURL: url)
-        frameExtractor.extractFrames(frameCount: 30) { images in
+        frameExtractor.extractFrames(frameCount: 6 ) { images in
             frameImages = images
             if let firstImage = images.first {
                 selectedFrameImage = firstImage
