@@ -214,7 +214,10 @@ struct ContentView: View {
             log("No drawing to save for frame \(currentIndex)")
             return
         }
-        let drawingData = drawingPath.toData()
+        guard let drawingData = drawingPath.toJSON()?.data(using: .utf8) else {
+            log("Failed to serialize drawing to JSON")
+            return
+        }
         realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentIndex)
         log("Drawing saved for frame \(currentIndex)")
     }
@@ -229,8 +232,8 @@ struct ContentView: View {
             return
         }
 
-        if let drawingData = frame.drawingData {
-            drawings[frameIndex] = Path(data: drawingData)
+        if let drawingData = frame.drawingData, let drawingJSON = String(data: drawingData, encoding: .utf8) {
+            drawings[frameIndex] = Path(json: drawingJSON)
             log("Loaded drawing for frame \(frameIndex)")
         } else {
             log("No drawing data found for frame \(frameIndex)")
@@ -259,4 +262,3 @@ struct ContentView: View {
         }
     }
 }
-

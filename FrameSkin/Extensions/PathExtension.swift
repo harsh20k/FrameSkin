@@ -2,116 +2,82 @@ import SwiftUI
 import CoreGraphics
 
 extension Path {
-    func toData() -> Data {
-        var data = Data()
+    func toJSON() -> String? {
+        var elements: [[String: Any]] = []
         self.forEach { element in
             switch element {
             case .move(to: let point):
-                var type: UInt8 = 0
-                data.append(&type, count: 1)
-                data.append(point.toData())
+                elements.append(["type": "move", "point": point.toJSON() ?? ""])
             case .line(to: let point):
-                var type: UInt8 = 1
-                data.append(&type, count: 1)
-                data.append(point.toData())
+                elements.append(["type": "line", "point": point.toJSON() ?? ""])
             case .quadCurve(to: let point, control: let control):
-                var type: UInt8 = 2
-                data.append(&type, count: 1)
-                data.append(point.toData())
-                data.append(control.toData())
+                elements.append(["type": "quadCurve", "point": point.toJSON() ?? "", "control": control.toJSON() ?? ""])
             case .curve(to: let point, control1: let control1, control2: let control2):
-                var type: UInt8 = 3
-                data.append(&type, count: 1)
-                data.append(point.toData())
-                data.append(control1.toData())
-                data.append(control2.toData())
+                elements.append(["type": "curve", "point": point.toJSON() ?? "", "control1": control1.toJSON() ?? "", "control2": control2.toJSON() ?? ""])
             case .closeSubpath:
-                var type: UInt8 = 4
-                data.append(&type, count: 1)
-            @unknown default:
+                elements.append(["type": "closeSubpath"])
                 break
             }
         }
-        return data
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: elements, options: []) else {
+            return nil
+        }
+        return String(data: jsonData, encoding: .utf8)
     }
-    
-    init(data: Data) {
+
+    init?(json: String) {
         self.init()
-        var index = 0
-        while index < data.count {
-            let type = data[index]
-            index += 1
+        guard let jsonData = json.data(using: .utf8),
+              let elements = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [[String: Any]] else {
+            return nil
+        }
+        for element in elements {
+            guard let type = element["type"] as? String else { continue }
             switch type {
-            case 0:
-                let point = CGPoint(data: data[index..<index+16])
-                self.move(to: point)
-                index += 16
-            case 1:
-                let point = CGPoint(data: data[index..<index+16])
-                self.addLine(to: point)
-                index += 16
-            case 2:
-                let point = CGPoint(data: data[index..<index+16])
-                index += 16
-                let control = CGPoint(data: data[index..<index+16])
-                self.addQuadCurve(to: point, control: control)
-                index += 16
-            case 3:
-                let point = CGPoint(data: data[index..<index+16])
-                index += 16
-                let control1 = CGPoint(data: data[index..<index+16])
-                index += 16
-                let control2 = CGPoint(data: data[index..<index+16])
-                self.addCurve(to: point, control1: control1, control2: control2)
-                index += 16
-            case 4:
+            case "move":
+                if let pointJSON = element["point"] as? String, let point = CGPoint(json: pointJSON) {
+                    self.move(to: point)
+                }
+            case "line":
+                if let pointJSON = element["point"] as? String, let point = CGPoint(json: pointJSON) {
+                    self.addLine(to: point)
+                }
+            case "quadCurve":
+                if let pointJSON = element["point"] as? String, let point = CGPoint(json: pointJSON),
+                   let controlJSON = element["control"] as? String, let control = CGPoint(json: controlJSON) {
+                    self.addQuadCurve(to: point, control: control)
+                }
+            case "curve":
+                if let pointJSON = element["point"] as? String, let point = CGPoint(json: pointJSON),
+                   let control1JSON = element["control1"] as? String, let control1 = CGPoint(json: control1JSON),
+                   let control2JSON = element["control2"] as? String, let control2 = CGPoint(json: control2JSON) {
+                    self.addCurve(to: point, control1: control1, control2: control2)
+                }
+            case "closeSubpath":
                 self.closeSubpath()
             default:
-                break
+                continue
             }
         }
     }
 }
 
 extension CGPoint {
-    func toData() -> Data {
-        var data = Data()
-        var x = self.x.bitPattern.littleEndian
-        var y = self.y.bitPattern.littleEndian
-        withUnsafeBytes(of: &x) { buffer in
-            data.append(buffer.bindMemory(to: UInt8.self))
+    func toJSON() -> String? {
+        let dict = ["x": self.x, "y": self.y]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: dict, options: []) else {
+            return nil
         }
-        withUnsafeBytes(of: &y) { buffer in
-            data.append(buffer.bindMemory(to: UInt8.self))
-        }
-        return data
+        return String(data: jsonData, encoding: .utf8)
     }
-    
-    init(data: Data) {
-        self.init() // Initialize the CGPoint instance
 
-        
-        // Ensure the data contains at least 16 bytes (8 bytes for each coordinate)
-        guard data.count >= 2 * MemoryLayout<UInt64>.size else {
-            fatalError("Data is not large enough to contain two UInt64 values.")
+    init?(json: String) {
+        guard let jsonData = json.data(using: .utf8),
+              let dict = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: CGFloat],
+              let x = dict["x"],
+              let y = dict["y"] else {
+            return nil
         }
-        
-        let x: UInt64 = data.withUnsafeBytes { $0.load(fromByteOffset: 0, as: UInt64.self) }
-        let y: UInt64 = data.withUnsafeBytes { $0.load(fromByteOffset: MemoryLayout<UInt64>.size, as: UInt64.self) }
-
-        
-        // Convert UInt64 to CGFloat properly
-        self.x = CGFloat(bitPattern: x.littleEndian)
-        self.y = CGFloat(bitPattern: y.littleEndian)
-    }
-}
-
-extension CGFloat {
-    init(bitPattern: UInt64) {
-        if MemoryLayout<CGFloat>.size == MemoryLayout<Double>.size {
-            self.init(Double(bitPattern: bitPattern))
-        } else {
-            self.init(Float(bitPattern: UInt32(bitPattern & 0xFFFFFFFF)))
-        }
+        self.init(x: x, y: y)
     }
 }

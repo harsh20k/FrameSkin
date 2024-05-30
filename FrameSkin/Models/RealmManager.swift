@@ -1,105 +1,78 @@
 import Foundation
 import RealmSwift
+import CoreGraphics
 
 class RealmManager: ObservableObject {
-    private(set) var realm: Realm
-    @Published var projects: Results<FrameSkinProject>
-    
+    private(set) var localRealm: Realm?
+    @Published private(set) var projects: [FrameSkinProject] = []
+
     init() {
-        realm = try! Realm()
-        projects = realm.objects(FrameSkinProject.self)
-        addDummyData()
+        openRealm()
+        loadProjects()
     }
-    
-    func addDummyData() {
-        guard projects.isEmpty else { return }
-        
-        log("Adding dummy data...")
-        let project = FrameSkinProject()
-        project.title = "Sample Project"
-        project.projectDescription = "This is a sample project."
-        project.createdDate = Date()
-        project.lastModifiedDate = Date()
-        project.version = 1
-        project.createdBy = "User"
-        project.tags.append(objectsIn: ["sample", "test"])
-        project.thumbnail = Data()
-        
-        let scene = FrameSkinScene()
-        scene.title = "Sample Scene"
-        
-        project.scenes.append(scene)
-        
-        try! realm.write {
-            realm.add(project)
+
+    func openRealm() {
+        do {
+            let config = Realm.Configuration(schemaVersion: 1)
+            Realm.Configuration.defaultConfiguration = config
+            localRealm = try Realm()
+        } catch {
+            print("Error opening Realm: \(error)")
         }
-        log("Dummy data added")
     }
-    
+
+    func loadProjects() {
+        if let localRealm = localRealm {
+            let allProjects = localRealm.objects(FrameSkinProject.self)
+            projects = Array(allProjects)
+        }
+    }
+
     func addFramesToProject(frames: [Data]) {
-        log("Adding frames to project...")
-        guard let project = projects.first else {
-            log("No project found")
-            return
-        }
-        
-        let videoTrack = FrameSkinTrack()
-        videoTrack.title = "Video Track"
-        videoTrack.type = .video
-        videoTrack.position = 1
-        
-        for (index, frameData) in frames.enumerated() {
-            let frame = FrameSkinFrame()
-            frame.frameIndex = index
-            frame.frameData = frameData
-            videoTrack.frames.append(frame)
-        }
-        
-        if let scene = project.scenes.first {
-            try! realm.write {
-                if scene.tracks.first(where: { $0.type == .video }) == nil {
+        if let localRealm = localRealm, let project = projects.first, let scene = project.scenes.first {
+            try? localRealm.write {
+                let videoTrack = scene.tracks.first(where: { $0.type == .video }) ?? FrameSkinTrack()
+                if videoTrack.type != .video {
+                    videoTrack.type = .video
+                    videoTrack.title = "Video Track"
+                    videoTrack.position = scene.tracks.count
                     scene.tracks.append(videoTrack)
-                    log("Video track added")
                 }
-                if scene.tracks.first(where: { $0.type == .drawing }) == nil {
-                    let drawingTrack = FrameSkinTrack()
-                    drawingTrack.title = "Drawing Track"
-                    drawingTrack.type = .drawing
-                    drawingTrack.position = scene.tracks.count + 1
-                    scene.tracks.append(drawingTrack)
-                    log("Drawing track added")
+
+                for (index, frameData) in frames.enumerated() {
+                    let frame = FrameSkinFrame()
+                    frame.frameIndex = index
+                    frame.frameData = frameData
+                    videoTrack.frames.append(frame)
                 }
+
+                localRealm.add(project, update: .modified)
             }
         }
-        log("Frames added to project")
     }
-    
+
     func addDrawingDataToTrack(drawingData: Data, frameIndex: Int) {
-        log("Adding drawing data to track for frame \(frameIndex)...")
-        guard let project = projects.first,
-              let scene = project.scenes.first,
-              let drawingTrack = scene.tracks.first(where: { $0.type == .drawing }) else {
-            log("No project, scene, or drawing track found")
-            return
-        }
-        
-        if let frame = drawingTrack.frames.first(where: { $0.frameIndex == frameIndex }) {
-            try! realm.write {
-                frame.drawingData = drawingData
-                log("Drawing data updated for frame \(frameIndex)")
+        if let localRealm = localRealm, let project = projects.first, let scene = project.scenes.first {
+            try? localRealm.write {
+                let drawingTrack = scene.tracks.first(where: { $0.type == .drawing }) ?? FrameSkinTrack()
+                if drawingTrack.type != .drawing {
+                    drawingTrack.type = .drawing
+                    drawingTrack.title = "Drawing Track"
+                    drawingTrack.position = scene.tracks.count
+                    scene.tracks.append(drawingTrack)
+                }
+
+                if let frame = drawingTrack.frames.first(where: { $0.frameIndex == frameIndex }) {
+                    frame.drawingData = drawingData
+                } else {
+                    let frame = FrameSkinFrame()
+                    frame.frameIndex = frameIndex
+                    frame.drawingData = drawingData
+                    drawingTrack.frames.append(frame)
+                }
+
+                localRealm.add(project, update: .modified)
             }
-        } else {
-            let frame = FrameSkinFrame()
-            frame.frameIndex = frameIndex
-            frame.drawingData = drawingData
-            try! realm.write {
-                drawingTrack.frames.append(frame)
-                log("Drawing data added for frame \(frameIndex)")
-            }
         }
-    }
-    
-    private func log(_ message: String) {
-        print(message)  // Print to console for debugging
     }
 }
