@@ -7,7 +7,7 @@ struct ContentView: View {
     @State private var selectedFrameImage: UIImage?
     @State private var frameImages: [UIImage] = []
     @State private var logs: [String] = []
-    @State private var drawings: [Int: [Path]] = [:]
+    @State private var drawings: [Int: Path] = [:]
     @State private var currentDrawing: Path = Path()
     @State private var currentIndex: Int = 0
     @State private var isPlaying: Bool = false
@@ -31,10 +31,8 @@ struct ContentView: View {
 
                 // Drawing Canvas
                 Canvas { context, size in
-                    if let frameDrawings = drawings[currentIndex] {
-                        for drawing in frameDrawings {
-                            context.stroke(drawing, with: .color(.white), lineWidth: 2)
-                        }
+                    if let frameDrawing = drawings[currentIndex] {
+                        context.stroke(frameDrawing, with: .color(.white), lineWidth: 2)
                     }
                     context.stroke(currentDrawing, with: .color(.white), lineWidth: 2)
                 }
@@ -48,9 +46,12 @@ struct ContentView: View {
                                 }
                             }
                             .onEnded { value in
-                                drawings[currentIndex, default: []].append(currentDrawing)
-                                currentDrawing = Path()
+                                if drawings[currentIndex] == nil {
+                                    drawings[currentIndex] = Path()
+                                }
+                                drawings[currentIndex]?.addPath(currentDrawing)
                                 saveDrawing()
+                                currentDrawing = Path()
                             })
             }
 
@@ -83,11 +84,10 @@ struct ContentView: View {
                             .font(.footnote)
                     }
                 }
-                .frame(maxWidth: 800, maxHeight: 100)
-
             }
-            .frame(maxWidth: 800, maxHeight: 100)
+            .frame(maxHeight: 100)
             .background(Color.black)
+            .padding(.top, 10)
         }
         .overlay(
             VStack {
@@ -210,18 +210,21 @@ struct ContentView: View {
     
     private func saveDrawing() {
         log("Saving drawing for frame \(currentIndex)...")
-        if let drawingData = try? NSKeyedArchiver.archivedData(withRootObject: drawings[currentIndex] ?? [], requiringSecureCoding: false), let firstProject = realmManager.projects.first {
+        guard let drawingPath = drawings[currentIndex] else {
+            log("No drawing to save for frame \(currentIndex)")
+            return
+        }
+        do {
+            let drawingData = try NSKeyedArchiver.archivedData(withRootObject: drawingPath, requiringSecureCoding: false)
             realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentIndex)
             log("Drawing saved for frame \(currentIndex)")
-        } else {
-            log("Failed to save drawing for frame \(currentIndex)")
+        } catch {
+            log("Failed to save drawing for frame \(currentIndex): \(error)")
         }
     }
 
     private func loadDrawings(for frameIndex: Int) {
         log("Loading drawings for frame \(frameIndex)...")
-        drawings[frameIndex] = []
-
         guard let project = realmManager.projects.first,
               let scene = project.scenes.first,
               let drawingTrack = scene.tracks.first(where: { $0.type == .drawing }),
@@ -232,14 +235,14 @@ struct ContentView: View {
 
         if let drawingData = frame.drawingData {
             do {
-                if let paths = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(drawingData) as? [Path] {
-                    drawings[frameIndex] = paths
-                    log("Loaded \(paths.count) drawings for frame \(frameIndex)")
+                if let path = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(drawingData) as? Path {
+                    drawings[frameIndex] = path
+                    log("Loaded drawing for frame \(frameIndex)")
                 } else {
-                    log("Failed to unarchive drawings for frame \(frameIndex)")
+                    log("Failed to unarchive drawing for frame \(frameIndex)")
                 }
             } catch {
-                log("Error unarchiving drawings for frame \(frameIndex): \(error)")
+                log("Error unarchiving drawing for frame \(frameIndex): \(error)")
             }
         } else {
             log("No drawing data found for frame \(frameIndex)")
@@ -268,4 +271,5 @@ struct ContentView: View {
         }
     }
 }
+
 
