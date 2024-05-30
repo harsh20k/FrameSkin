@@ -13,7 +13,7 @@ class RealmManager: ObservableObject {
     
     func addDummyData() {
         guard projects.isEmpty else { return }
-
+        
         log("Adding dummy data...")
         let project = FrameSkinProject()
         project.title = "Sample Project"
@@ -103,5 +103,3 @@ class RealmManager: ObservableObject {
         print(message)  // Print to console for debugging
     }
 }
-
-

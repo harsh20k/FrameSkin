@@ -66,6 +66,7 @@ struct ContentView: View {
                                 .onTapGesture {
                                     selectedFrameImage = frameImages[index]
                                     currentIndex = index
+                                    loadDrawings(for: index)
                                     log("Frame \(index) selected")
                                 }
                         }
@@ -82,10 +83,11 @@ struct ContentView: View {
                             .font(.footnote)
                     }
                 }
+                .frame(maxWidth: 800, maxHeight: 100)
+
             }
-            .frame(maxHeight: 100)
+            .frame(maxWidth: 800, maxHeight: 100)
             .background(Color.black)
-            .padding(.top, 10)
         }
         .overlay(
             VStack {
@@ -129,6 +131,7 @@ struct ContentView: View {
                 selectedFrameImage = frameImages.first
                 currentIndex = 0
                 log("Loaded \(frameImages.count) frames from existing video track")
+                loadDrawings(for: 0)
             }
         } else {
             log("No video track found, extracting frames...")
@@ -206,10 +209,40 @@ struct ContentView: View {
     }
     
     private func saveDrawing() {
-        log("Saving drawing...")
+        log("Saving drawing for frame \(currentIndex)...")
         if let drawingData = try? NSKeyedArchiver.archivedData(withRootObject: drawings[currentIndex] ?? [], requiringSecureCoding: false), let firstProject = realmManager.projects.first {
             realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentIndex)
             log("Drawing saved for frame \(currentIndex)")
+        } else {
+            log("Failed to save drawing for frame \(currentIndex)")
+        }
+    }
+
+    private func loadDrawings(for frameIndex: Int) {
+        log("Loading drawings for frame \(frameIndex)...")
+        drawings[frameIndex] = []
+
+        guard let project = realmManager.projects.first,
+              let scene = project.scenes.first,
+              let drawingTrack = scene.tracks.first(where: { $0.type == .drawing }),
+              let frame = drawingTrack.frames.first(where: { $0.frameIndex == frameIndex }) else {
+            log("No drawings found for frame \(frameIndex)")
+            return
+        }
+
+        if let drawingData = frame.drawingData {
+            do {
+                if let paths = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(drawingData) as? [Path] {
+                    drawings[frameIndex] = paths
+                    log("Loaded \(paths.count) drawings for frame \(frameIndex)")
+                } else {
+                    log("Failed to unarchive drawings for frame \(frameIndex)")
+                }
+            } catch {
+                log("Error unarchiving drawings for frame \(frameIndex): \(error)")
+            }
+        } else {
+            log("No drawing data found for frame \(frameIndex)")
         }
     }
     
@@ -218,6 +251,7 @@ struct ContentView: View {
         timer = Timer.scheduledTimer(withTimeInterval: 3.0 / 30.0, repeats: true) { _ in
             currentIndex = (currentIndex + 1) % frameImages.count
             selectedFrameImage = frameImages[currentIndex]
+            loadDrawings(for: currentIndex)
         }
     }
 
