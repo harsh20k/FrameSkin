@@ -12,6 +12,9 @@
 		3A0175E32C04AF2800AF3D6F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175E22C04AF2800AF3D6F /* Assets.xcassets */; };
 		3A0175E62C04AF2800AF3D6F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175E52C04AF2800AF3D6F /* Preview Assets.xcassets */; };
 		3A0175F22C04DA1500AF3D6F /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 3A0175F12C04DA1500AF3D6F /* sample.mp4 */; };
+		3A0477B72C09CEE80026F549 /* ShortcutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0477B62C09CEE80026F549 /* ShortcutManager.swift */; };
+		3A0477B92C09D0160026F549 /* KeyCombinationInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0477B82C09D0160026F549 /* KeyCombinationInputView.swift */; };
+		3A0477BB2C09D0390026F549 /* ShortcutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A0477BA2C09D0390026F549 /* ShortcutSettingsView.swift */; };
 		3A2D77252C08AC87001DBDE7 /* FrameListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2D77242C08AC87001DBDE7 /* FrameListView.swift */; };
 		3A2D77272C08AC9C001DBDE7 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2D77262C08AC9C001DBDE7 /* LogView.swift */; };
 		3A2D77292C08ACE7001DBDE7 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2D77282C08ACE7001DBDE7 /* Logger.swift */; };
@@ -47,6 +50,9 @@
 		3A0175E52C04AF2800AF3D6F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3A0175EE2C04BD3100AF3D6F /* dummy.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = dummy.md; sourceTree = "<group>"; };
 		3A0175F12C04DA1500AF3D6F /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
+		3A0477B62C09CEE80026F549 /* ShortcutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutManager.swift; sourceTree = "<group>"; };
+		3A0477B82C09D0160026F549 /* KeyCombinationInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCombinationInputView.swift; sourceTree = "<group>"; };
+		3A0477BA2C09D0390026F549 /* ShortcutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutSettingsView.swift; sourceTree = "<group>"; };
 		3A2D77242C08AC87001DBDE7 /* FrameListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameListView.swift; sourceTree = "<group>"; };
 		3A2D77262C08AC9C001DBDE7 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		3A2D77282C08ACE7001DBDE7 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -119,6 +125,8 @@
 				3A2D77262C08AC9C001DBDE7 /* LogView.swift */,
 				3A2D772A2C08AD8D001DBDE7 /* CanvasView.swift */,
 				3A2D772C2C08ADB2001DBDE7 /* ControlView.swift */,
+				3A0477B82C09D0160026F549 /* KeyCombinationInputView.swift */,
+				3A0477BA2C09D0390026F549 /* ShortcutSettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -127,6 +135,7 @@
 			isa = PBXGroup;
 			children = (
 				3A2D772F2C08AECB001DBDE7 /* FrameExtractor.swift */,
+				3A0477B62C09CEE80026F549 /* ShortcutManager.swift */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -229,14 +238,17 @@
 				3A0175E12C04AF2600AF3D6F /* ContentView.swift in Sources */,
 				3A2D77302C08AECB001DBDE7 /* FrameExtractor.swift in Sources */,
 				3AE164612C07E0BC0089443A /* RealmManager.swift in Sources */,
+				3A0477BB2C09D0390026F549 /* ShortcutSettingsView.swift in Sources */,
 				3A2D77252C08AC87001DBDE7 /* FrameListView.swift in Sources */,
 				3AFBB45D2C07FF2100EC3F75 /* PathExtension.swift in Sources */,
 				3A2D772D2C08ADB2001DBDE7 /* ControlView.swift in Sources */,
 				3A0175DF2C04AF2600AF3D6F /* FrameSkinApp.swift in Sources */,
+				3A0477B72C09CEE80026F549 /* ShortcutManager.swift in Sources */,
 				3AE164442C07C4350089443A /* Modelsseperatelater.swift in Sources */,
 				3A2D77272C08AC9C001DBDE7 /* LogView.swift in Sources */,
 				3A2D77292C08ACE7001DBDE7 /* Logger.swift in Sources */,
 				3A2D772B2C08AD8D001DBDE7 /* CanvasView.swift in Sources */,
+				3A0477B92C09D0160026F549 /* KeyCombinationInputView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

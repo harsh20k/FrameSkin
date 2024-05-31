@@ -4,6 +4,8 @@ struct ControlView: View {
     @Binding var isPlaying: Bool
     let startAnimation: () -> Void
     let stopAnimation: () -> Void
+    
+    
 
     var body: some View {
         VStack {
@@ -23,6 +25,7 @@ struct ControlView: View {
                     .background(Color.white)
                     .clipShape(Circle())
             }
+            .keyboardShortcut("p")
             .padding()
         }
         .frame(maxWidth: .infinity, alignment: .trailing)

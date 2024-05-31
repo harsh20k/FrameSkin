@@ -4,6 +4,7 @@ import RealmSwift
 
 struct ContentView: View {
     @StateObject private var realmManager = RealmManager()
+    @StateObject private var shortcutManager = ShortcutManager()
     @State private var selectedFrameImage: UIImage?
     @State private var frameImages: [UIImage] = []
     @State private var logs: [String] = []
@@ -12,29 +13,83 @@ struct ContentView: View {
     @State private var currentIndex: Int = 0
     @State private var isPlaying: Bool = false
     @State private var timer: Timer?
+    @State private var showingSettings = false
 
     var body: some View {
-        VStack {
-            Spacer()
-            CanvasView(selectedFrameImage: $selectedFrameImage, drawings: $drawings, currentDrawing: $currentDrawing, currentIndex: $currentIndex) {
-                saveDrawing()
-            }
+        NavigationView {
+            VStack {
+                Spacer()
+                CanvasView(selectedFrameImage: $selectedFrameImage, drawings: $drawings, currentDrawing: $currentDrawing, currentIndex: $currentIndex) {
+                    saveDrawing()
+                }
 
-            FrameListView(frameImages: $frameImages, selectedFrameImage: $selectedFrameImage, currentIndex: $currentIndex) { index in
-                loadDrawings(for: index)
-                log("Frame \(index) selected")
-            }
+                FrameListView(frameImages: $frameImages, selectedFrameImage: $selectedFrameImage, currentIndex: $currentIndex) { index in
+                    loadDrawings(for: index)
+                    log("Frame \(index) selected")
+                }
 
-            Spacer()
-            LogView(logs: $logs)
-                .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
+                Spacer()
+                LogView(logs: $logs)
+                    .frame(maxWidth: .infinity, maxHeight: 200)
+            }
+            .overlay(
+                ControlView(isPlaying: $isPlaying, startAnimation: startAnimation, stopAnimation: stopAnimation)
+            )
+            .onAppear {
+                loadFrames()
+            }
+            .overlay(
+                VStack {
+                    Spacer()
+                    HStack {
+                        Button(action: togglePlayPause) {
+                            EmptyView()
+                        }
+                        .keyboardShortcut(shortcutManager.keyEquivalent(for: "playPause"), modifiers: [])
+                        
+                        Button(action: nextFrame) {
+                            EmptyView()
+                        }
+                        .keyboardShortcut(shortcutManager.keyEquivalent(for: "nextFrame"), modifiers: [])
+                        
+                        Button(action: previousFrame) {
+                            EmptyView()
+                        }
+                        .keyboardShortcut(shortcutManager.keyEquivalent(for: "previousFrame"), modifiers: [])
+                    }
+                }
+            )
+            .navigationBarTitle("FrameSkin", displayMode: .inline)
+            .navigationBarItems(leading: Button(action: {
+                showingSettings.toggle()
+            }) {
+                Text("Settings")
+            })
+            .sheet(isPresented: $showingSettings) {
+                ShortcutSettingsView(shortcutManager: shortcutManager)
+            }
         }
-        .overlay(
-            ControlView(isPlaying: $isPlaying, startAnimation: startAnimation, stopAnimation: stopAnimation)
-        )
-        .onAppear {
-            loadFrames()
+    }
+
+    private func togglePlayPause() {
+        isPlaying.toggle()
+        if isPlaying {
+            startAnimation()
+        } else {
+            stopAnimation()
         }
+    }
+
+    private func nextFrame() {
+        currentIndex = min(currentIndex + 1, frameImages.count - 1)
+        selectedFrameImage = frameImages[currentIndex]
+        loadDrawings(for: currentIndex)
+    }
+
+    private func previousFrame() {
+        currentIndex = max(currentIndex - 1, 0)
+        selectedFrameImage = frameImages[currentIndex]
+        loadDrawings(for: currentIndex)
     }
 
     private func loadFrames() {
@@ -46,7 +101,7 @@ struct ContentView: View {
 
         if let videoTrack = scene.tracks.first(where: { $0.type == .video }) {
             log("Video track found")
-            if videoTrack.frames.isEmpty {
+            if (videoTrack.frames.isEmpty) {
                 log("Video track found but contains no frames, extracting frames...")
                 extractFrames()
             } else {
@@ -71,7 +126,7 @@ struct ContentView: View {
         }
         
         let frameExtractor = FrameExtractor(videoURL: url)
-        frameExtractor.extractFrames(frameCount: 6 ) { images in
+        frameExtractor.extractFrames(frameCount: 30) { images in
             frameImages = images
             if let firstImage = images.first {
                 selectedFrameImage = firstImage
