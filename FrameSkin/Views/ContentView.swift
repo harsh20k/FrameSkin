@@ -19,16 +19,26 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
+//            Button(action: {
+//                   // Action to perform when the button is tapped
+//                showingSettings = true
+//                 }) {
+//                   Label("Show Some Love!", systemImage: "heart.fill")
+//                     .padding()
+//                     .foregroundColor(.white)
+//                     .background(Color.blue)
+//                     .cornerRadius(10)
+//                 }
             Spacer()
             CanvasView(selectedFrameImage: $selectedFrameImage, drawings: $drawings, currentDrawing: $currentDrawing, currentIndex: $currentFrameIndex) {
                 saveDrawing()
             }
-
+            
             FrameListView(tracks: $tracks, selectedFrameImage: $selectedFrameImage, currentTrackIndex: $currentTrackIndex, currentFrameIndex: $currentFrameIndex) { trackIndex, frameIndex in
                 loadDrawings(for: trackIndex, frameIndex: frameIndex)
                 log("Track \(trackIndex), Frame \(frameIndex) selected")
             }
-
+            
             Spacer()
             LogView(logs: $logs)
                 .frame(maxWidth: .infinity, maxHeight: 200)
@@ -70,6 +80,7 @@ struct ContentView: View {
             ShortcutSettingsView(shortcutManager: shortcutManager)
         }
     }
+
 
 
 }

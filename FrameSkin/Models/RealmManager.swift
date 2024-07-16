@@ -11,24 +11,29 @@ class RealmManager: ObservableObject {
         loadProjects()
         createDummyProjectIfNeeded()
     }
-
+  
     func openRealm() {
         do {
             let config = Realm.Configuration(schemaVersion: 1)
             Realm.Configuration.defaultConfiguration = config
             localRealm = try Realm()
         } catch {
-            print("Error opening Realm: \(error)")
+			fatalError("Error opening Realm: \(error)")
         }
     }
 
-    func loadProjects() {
-        if let localRealm = localRealm {
-            let allProjects = localRealm.objects(FrameSkinProject.self)
-            projects = Array(allProjects)
-            print("Loaded \(projects.count) projects from Realm")
-        }
-    }
+	func loadProjects() {
+		if let localRealm = localRealm {
+			let allProjects = localRealm.objects(FrameSkinProject.self)
+			projects = Array(allProjects)
+			print("Loaded \(projects.count) projects from Realm")
+			
+				// Calculate the size of the projects array in bytes
+			let sizeInBytes = projects.reduce(0) { $0 + $1.sizeInBytes }
+			let sizeInMegabytes = Double(sizeInBytes) / (1024 * 1024)
+			print("Size of projects array: \(String(format: "%.2f", sizeInMegabytes)) MB")
+		}
+	}
 
     func createDummyProjectIfNeeded() {
         if projects.isEmpty {
@@ -48,9 +53,13 @@ class RealmManager: ObservableObject {
         let scene = FrameSkinScene()
         project.scenes.append(scene)
 
-        try? localRealm.write {
-            localRealm.add(project)
-        }
+		do {
+			try localRealm.write {
+				localRealm.add(project)
+			}
+		} catch {
+			fatalError("Unable to write dummy project to Realm DB: \(error.localizedDescription)")
+		}
 
         // Reload projects to include the new dummy project
         loadProjects()

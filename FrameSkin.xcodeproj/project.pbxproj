@@ -21,6 +21,7 @@
 		3A2D772B2C08AD8D001DBDE7 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2D772A2C08AD8D001DBDE7 /* CanvasView.swift */; };
 		3A2D772D2C08ADB2001DBDE7 /* ControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2D772C2C08ADB2001DBDE7 /* ControlView.swift */; };
 		3A2D77302C08AECB001DBDE7 /* FrameExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A2D772F2C08AECB001DBDE7 /* FrameExtractor.swift */; };
+		3A4EB49F2C46D5760011FE6E /* OpenProjectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4EB49E2C46D5760011FE6E /* OpenProjectView.swift */; };
 		3A8404E82C170F440095BF16 /* FrameManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8404E72C170F440095BF16 /* FrameManagement.swift */; };
 		3AE164442C07C4350089443A /* Modelsseperatelater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE164432C07C4350089443A /* Modelsseperatelater.swift */; };
 		3AE1645E2C07CFC20089443A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3AE1645D2C07CFC20089443A /* RealmSwift */; };
@@ -60,6 +61,7 @@
 		3A2D772A2C08AD8D001DBDE7 /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
 		3A2D772C2C08ADB2001DBDE7 /* ControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlView.swift; sourceTree = "<group>"; };
 		3A2D772F2C08AECB001DBDE7 /* FrameExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameExtractor.swift; sourceTree = "<group>"; };
+		3A4EB49E2C46D5760011FE6E /* OpenProjectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenProjectView.swift; sourceTree = "<group>"; };
 		3A8404E72C170F440095BF16 /* FrameManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameManagement.swift; sourceTree = "<group>"; };
 		3AE164432C07C4350089443A /* Modelsseperatelater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modelsseperatelater.swift; sourceTree = "<group>"; };
 		3AE164602C07E0BC0089443A /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				3A0175E02C04AF2600AF3D6F /* ContentView.swift */,
+				3A4EB49E2C46D5760011FE6E /* OpenProjectView.swift */,
 				3A2D77242C08AC87001DBDE7 /* FrameListView.swift */,
 				3A2D77262C08AC9C001DBDE7 /* LogView.swift */,
 				3A2D772A2C08AD8D001DBDE7 /* CanvasView.swift */,
@@ -242,6 +245,7 @@
 				3A2D77302C08AECB001DBDE7 /* FrameExtractor.swift in Sources */,
 				3AE164612C07E0BC0089443A /* RealmManager.swift in Sources */,
 				3A0477BB2C09D0390026F549 /* ShortcutSettingsView.swift in Sources */,
+				3A4EB49F2C46D5760011FE6E /* OpenProjectView.swift in Sources */,
 				3A2D77252C08AC87001DBDE7 /* FrameListView.swift in Sources */,
 				3A8404E82C170F440095BF16 /* FrameManagement.swift in Sources */,
 				3AFBB45D2C07FF2100EC3F75 /* PathExtension.swift in Sources */,

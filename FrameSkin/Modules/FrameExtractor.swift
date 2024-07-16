@@ -4,11 +4,11 @@ import UIKit
 
 class FrameExtractor {
     let videoURL: URL
-
+    
     init(videoURL: URL) {
         self.videoURL = videoURL
     }
-
+    
     func extractFrames(frameCount: Int, completion: @escaping ([UIImage]) -> Void) {
         let asset = AVAsset(url: videoURL)
         let assetImageGenerator = AVAssetImageGenerator(asset: asset)
@@ -19,7 +19,7 @@ class FrameExtractor {
 
         Task {
             do {
-                let duration = try await asset.load(.duration)
+               // let duration = try await asset.load(.duration)
                 let tracks = try await asset.load(.tracks)
 
                 var frameRate: Double = 30.0
