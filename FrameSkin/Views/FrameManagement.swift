@@ -1,7 +1,7 @@
 import SwiftUI
 import AVFoundation
 
-extension ContentView {
+extension OpenProjectView {
     func loadTracks() {
         log("Loading tracks...")
         guard let project = realmManager.projects.first, let scene = project.scenes.first else {
