@@ -11,7 +11,7 @@ class RealmManager: ObservableObject {
         loadProjects()
         createDummyProjectIfNeeded()
     }
-  
+
     func openRealm() {
         do {
             let config = Realm.Configuration(schemaVersion: 1)

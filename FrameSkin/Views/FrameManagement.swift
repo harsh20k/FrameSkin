@@ -2,12 +2,20 @@ import SwiftUI
 import AVFoundation
 
 extension OpenProjectView {
-    func loadTracks() {
+	func loadTracks(project: FrameSkinProject) {
         log("Loading tracks...")
-        guard let project = realmManager.projects.first, let scene = project.scenes.first else {
-            log("No project or scene found")
-            return
-        }
+		
+		//commented for fetching the first project
+//        guard let project = realmManager.projects.first, let scene = project.scenes.first else {
+//            log("No project or scene found")
+//            return
+//        }
+		
+		//fetching first scene of the selected project 
+		guard let scene = project.scenes.first else {
+			log("No project or scene found")
+			return
+		}
         tracks = Array(scene.tracks)
         if let firstTrack = tracks.first, let firstFrame = firstTrack.frames.first, let frameData = firstFrame.frameData, let uiImage = UIImage(data: frameData) {
             selectedFrameImage = uiImage

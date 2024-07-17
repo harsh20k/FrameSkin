@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct OpenProjectView: View {
+	var project: FrameSkinProject
 	var realmManager: RealmManager
 	var shortcutManager: ShortcutManager
 	@Binding var logs: [String]
@@ -14,6 +15,7 @@ struct OpenProjectView: View {
 	@State internal var isPlaying: Bool = false
 	@State internal var timer: Timer?
 	@State internal var showingSettings = false
+	
 	
 	var body: some View {
 		VStack {
@@ -45,7 +47,7 @@ struct OpenProjectView: View {
 			ControlView(isPlaying: $isPlaying, startAnimation: startAnimation, stopAnimation: stopAnimation)
 		)
 		.onAppear {
-			loadTracks()
+			loadTracks(project: project)
 		}
 		.overlay(
 			VStack {

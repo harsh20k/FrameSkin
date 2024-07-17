@@ -1,7 +1,7 @@
 import Foundation
 import RealmSwift
 
-class FrameSkinProject: Object, Identifiable {
+class FrameSkinProject: Object, Identifiable, Codable {
     
     @Persisted(primaryKey: true) var id: ObjectId
     @Persisted var title: String
@@ -61,7 +61,7 @@ extension FrameSkinTrack {
 
 extension FrameSkinFrame {
 	var sizeInBytes: Int {
-		var size = MemoryLayout.size(ofValue: self.id) +
+		let size = MemoryLayout.size(ofValue: self.id) +
 		MemoryLayout.size(ofValue: self.frameIndex) +
 		(frameData?.count ?? 0) +
 		(drawingData?.count ?? 0)
@@ -70,7 +70,7 @@ extension FrameSkinFrame {
 }
 
 
-class FrameSkinScene: Object, Identifiable {
+class FrameSkinScene: Object, Identifiable, Codable {
     
     @Persisted(primaryKey: true) var id: ObjectId
     @Persisted var title: String
@@ -82,14 +82,13 @@ class FrameSkinScene: Object, Identifiable {
     }
 }
 
-
 enum TrackType: String, PersistableEnum {
     case video
     case audio
     case drawing
     // Add other track types as needed
 }
-class FrameSkinTrack: Object, Identifiable {
+class FrameSkinTrack: Object, Identifiable, Codable {
     
     @Persisted(primaryKey: true) var id: ObjectId
     @Persisted var title: String
@@ -116,7 +115,7 @@ class FrameSkinTrack: Object, Identifiable {
 }
 
 
-class FrameSkinFrame: Object, Identifiable {
+class FrameSkinFrame: Object, Identifiable, Codable {
     
     @Persisted(primaryKey: true) var id: ObjectId
     @Persisted var frameIndex: Int
