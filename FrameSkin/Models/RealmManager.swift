@@ -5,13 +5,13 @@ import SwiftUI
 
 class RealmManager: ObservableObject {
     private(set) var localRealm: Realm?
-    @Published private(set) var projects: [FrameSkinProject] = []
+    @Published public var projects: [FrameSkinProject] = []
 
     init() {
 		DispatchQueue.main.async{
 			self.openRealm()
 			self.loadProjects()
-			self.createDummyProjectIfNeeded(forceCreate: true)
+			self.createDummyProjectIfNeeded(forceCreate: false)
 		}
     }
 
@@ -41,28 +41,43 @@ class RealmManager: ObservableObject {
 		let sizeInMegabytes = Double(sizeInBytes) / (1024 * 1024)
 		print("Size of projects array: \(String(format: "%.2f", sizeInMegabytes)) MB")
 	}
+	
+	func projectCount() {
+		print("project count: \(self.projects.count)")
+	}
+	
 	func deleteAllProjects() {
 			// Ensure the Realm instance is available
 		guard let localRealm = localRealm else {
 			print("Realm instance is not available")
 			return
 		}
-		
-		do {
-				// Begin a write transaction
-			try localRealm.write {
-					// Fetch all projects from the Realm database
+		DispatchQueue.main.async {
+			do {
+					// Begin a write transaction
+				try localRealm.write {
+						// Fetch all projects from the Realm database
+					let allProjects = localRealm.objects(FrameSkinProject.self)
+					let allScenes = localRealm.objects(FrameSkinScene.self)
+					let allTracks = localRealm.objects(FrameSkinTrack.self)
+					let allFrames = localRealm.objects(FrameSkinFrame.self)
+						// Delete all fetched projects
+					localRealm.delete(allProjects)
+					localRealm.delete(allScenes)
+					localRealm.delete(allTracks)
+					localRealm.delete(allFrames)
+					print("All projects and their data have been deleted")
+				}
+				self.openRealm()
+				self.projectCount()
 				let allProjects = localRealm.objects(FrameSkinProject.self)
+				print("\(allProjects.count)")
+				self.projectCount()
 				
-					// Delete all fetched projects
-				localRealm.delete(allProjects)
-				loadProjects()
-				print("All projects have been deleted")
+			} catch {
+					// Handle any errors that occur during the write transaction
+				fatalError("Unable to delete projects from Realm DB: \(error.localizedDescription)")
 			}
-		
-		} catch {
-				// Handle any errors that occur during the write transaction
-			fatalError("Unable to delete projects from Realm DB: \(error.localizedDescription)")
 		}
 	}
 
@@ -226,55 +241,72 @@ class RealmManager: ObservableObject {
 	}
 	
 	
-//    func addDrawingDataToTrack(drawingData: Data, frameIndex: Int) {
-//        if let localRealm = localRealm, let project = projects.first, let scene = project.scenes.first {
-//            try? localRealm.write {
-//                var drawingTrack = scene.tracks.first(where: { $0.type == .drawing })
-//                if drawingTrack == nil {
-//                    drawingTrack = FrameSkinTrack()
-//                    drawingTrack?.type = .drawing
-//                    drawingTrack?.title = "Drawing Track"
-//                    drawingTrack?.position = scene.tracks.count
-//                    scene.tracks.append(drawingTrack!)
-//                    print("Created new drawing track")
-//                }
-//
-//                if let frame = drawingTrack?.frames.first(where: { $0.frameIndex == frameIndex }) {
-//                    frame.drawingData = drawingData
-//                } else {
-//                    let frame = FrameSkinFrame()
-//                    frame.frameIndex = frameIndex
-//                    frame.drawingData = drawingData
-//                    drawingTrack?.frames.append(frame)
-//                }
-//
-//                localRealm.add(project, update: .modified)
-//                print("Added drawing data for frame \(frameIndex) to project")
-//            }
-//        } else {
-//            print("Failed to add drawing data to project: Realm or project/scene not found")
-//        }
-//    }
+    func addDrawingDataToTrack(drawingData: Data, frameIndex: Int) {
+        if let localRealm = localRealm, 
+			let project = projects.first,
+			let scene = project.scenes.first {
+            try? localRealm.write {
+                var drawingTrack = scene.tracks.first(where: { $0.type == .drawing })
+                if drawingTrack == nil {
+                    drawingTrack = FrameSkinTrack()
+                    drawingTrack?.type = .drawing
+                    drawingTrack?.title = "Drawing Track"
+                    drawingTrack?.position = scene.tracks.count
+                    scene.tracks.append(drawingTrack!)
+                    print("Created new drawing track")
+                }
+
+                if let frame = drawingTrack?.frames.first(where: { $0.frameIndex == frameIndex }) {
+                    frame.drawingData = drawingData
+                } else {
+                    let frame = FrameSkinFrame()
+                    frame.frameIndex = frameIndex
+                    frame.drawingData = drawingData
+                    drawingTrack?.frames.append(frame)
+                }
+
+                localRealm.add(project, update: .modified)
+                print("Added drawing data for frame \(frameIndex) to project")
+            }
+        } else {
+            print("Failed to add drawing data to project: Realm or project/scene not found")
+        }
+    }
 	
-	func addDrawingDataToTrack(drawingData: Data, frameIndex: Int, trackId: ObjectId) {
-		if let localRealm = localRealm, let track = localRealm.object(ofType: FrameSkinTrack.self, forPrimaryKey: trackId) {
-			try? localRealm.write {
-				if let frame = track.frames.first(where: { $0.frameIndex == frameIndex }) {
-					frame.drawingData = drawingData
-				} else {
-					let frame = FrameSkinFrame()
-					frame.frameIndex = frameIndex
-					frame.drawingData = drawingData
-					track.frames.append(frame)
-				}
-				
-				localRealm.add(track, update: .modified)
-				print("Added drawing data for frame \(frameIndex) to track \(trackId)")
+	func addDrawingDataToTrack(drawingData: Data, frameIndex: Int, projectId: ObjectId) {
+		guard let localRealm = localRealm,
+			  let project = localRealm.object(ofType: FrameSkinProject.self, forPrimaryKey: projectId),
+			  let scene = project.scenes.first else {
+			print("Failed to find the project or scene for the given ID")
+			return
+		}
+		
+		try? localRealm.write {
+			var drawingTrack = scene.tracks.first(where: { $0.type == .drawing })
+			if drawingTrack == nil {
+				drawingTrack = FrameSkinTrack()
+				drawingTrack?.type = .drawing
+				drawingTrack?.title = "Drawing Track"
+				drawingTrack?.position = scene.tracks.count
+				scene.tracks.append(drawingTrack!)
+				print("Created new drawing track")
 			}
-		} else {
-			print("Failed to add drawing data to track: Realm instance or track not found")
+			
+			if let frame = drawingTrack?.frames.first(where: { $0.frameIndex == frameIndex }) {
+				frame.drawingData = drawingData
+			} else {
+				let frame = FrameSkinFrame()
+				frame.frameIndex = frameIndex
+				frame.drawingData = drawingData
+				drawingTrack?.frames.append(frame)
+			}
+			
+			localRealm.add(project, update: .modified)
+			print("Added drawing data for frame \(frameIndex) to project \(project.title)")
 		}
 	}
+	
+
 	
 
 }

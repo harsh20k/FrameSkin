@@ -55,20 +55,6 @@ extension OpenProjectView {
 //		}
 //	}
 		/// Saves the current drawing to the Realm database.
-//	func saveDrawing() {
-//		log("Saving drawing for track \(currentTrackIndex), frame \(currentFrameIndex)...")
-//		guard let drawingPath = drawings[currentFrameIndex] else {
-//			log("No drawing to save for frame \(currentFrameIndex)")
-//			return
-//		}
-//		guard let drawingData = drawingPath.toJSON()?.data(using: .utf8) else {
-//			log("Failed to serialize drawing to JSON")
-//			return
-//		}
-//		realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentFrameIndex)
-//		log("Drawing saved for track \(currentTrackIndex), frame \(currentFrameIndex)")
-//	}
-	
 	func saveDrawing() {
 		log("Saving drawing for track \(currentTrackIndex), frame \(currentFrameIndex)...")
 		guard let drawingPath = drawings[currentFrameIndex] else {
@@ -80,10 +66,11 @@ extension OpenProjectView {
 			return
 		}
 		
-		let currentTrack = tracks[currentTrackIndex]
-		realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentFrameIndex, trackId: currentTrack.id)
-		log("Drawing saved for track \(currentTrackIndex), frame \(currentFrameIndex) in track \(currentTrack.id)")
+			// Assuming `project` is the current project being worked on
+		realmManager.addDrawingDataToTrack(drawingData: drawingData, frameIndex: currentFrameIndex, projectId: project.id)
+		log("Drawing saved for track \(currentTrackIndex), frame \(currentFrameIndex) in project \(project.title)")
 	}
+	
 		/// Loads the drawing data for the specified track and frame index.
 		/// - Parameters:
 		///   - trackIndex: The index of the track.
