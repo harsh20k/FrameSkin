@@ -20,56 +20,6 @@ class FrameSkinProject: Object, Identifiable, Codable {
     }
 }
 
-extension FrameSkinProject {
-	var sizeInBytes: Int {
-		var size = MemoryLayout.size(ofValue: self.id) +
-		MemoryLayout.size(ofValue: self.title) +
-		(projectDescription?.count ?? 0) +
-		MemoryLayout.size(ofValue: self.createdDate) +
-		MemoryLayout.size(ofValue: self.lastModifiedDate) +
-		MemoryLayout.size(ofValue: self.version) +
-		(createdBy?.count ?? 0) +
-		tags.reduce(0) { $0 + $1.count } +
-		(thumbnail?.count ?? 0)
-		
-		size += scenes.reduce(0) { $0 + $1.sizeInBytes }
-		return size
-	}
-}
-
-extension FrameSkinScene {
-	var sizeInBytes: Int {
-		var size = MemoryLayout.size(ofValue: self.id) +
-		MemoryLayout.size(ofValue: self.title)
-		
-		size += tracks.reduce(0) { $0 + $1.sizeInBytes }
-		return size
-	}
-}
-
-extension FrameSkinTrack {
-	var sizeInBytes: Int {
-		var size = MemoryLayout.size(ofValue: self.id) +
-		MemoryLayout.size(ofValue: self.title) +
-		MemoryLayout.size(ofValue: self.rawType) +
-		MemoryLayout.size(ofValue: self.position)
-		
-		size += frames.reduce(0) { $0 + $1.sizeInBytes }
-		return size
-	}
-}
-
-extension FrameSkinFrame {
-	var sizeInBytes: Int {
-		let size = MemoryLayout.size(ofValue: self.id) +
-		MemoryLayout.size(ofValue: self.frameIndex) +
-		(frameData?.count ?? 0) +
-		(drawingData?.count ?? 0)
-		return size
-	}
-}
-
-
 class FrameSkinScene: Object, Identifiable, Codable {
     
     @Persisted(primaryKey: true) var id: ObjectId
@@ -126,3 +76,57 @@ class FrameSkinFrame: Object, Identifiable, Codable {
         return "id"
     }
 }
+
+
+
+//extensions
+
+extension FrameSkinProject {
+	var sizeInBytes: Int {
+		var size = MemoryLayout.size(ofValue: self.id) +
+		MemoryLayout.size(ofValue: self.title) +
+		(projectDescription?.count ?? 0) +
+		MemoryLayout.size(ofValue: self.createdDate) +
+		MemoryLayout.size(ofValue: self.lastModifiedDate) +
+		MemoryLayout.size(ofValue: self.version) +
+		(createdBy?.count ?? 0) +
+		tags.reduce(0) { $0 + $1.count } +
+		(thumbnail?.count ?? 0)
+		
+		size += scenes.reduce(0) { $0 + $1.sizeInBytes }
+		return size
+	}
+}
+
+extension FrameSkinScene {
+	var sizeInBytes: Int {
+		var size = MemoryLayout.size(ofValue: self.id) +
+		MemoryLayout.size(ofValue: self.title)
+		
+		size += tracks.reduce(0) { $0 + $1.sizeInBytes }
+		return size
+	}
+}
+
+extension FrameSkinTrack {
+	var sizeInBytes: Int {
+		var size = MemoryLayout.size(ofValue: self.id) +
+		MemoryLayout.size(ofValue: self.title) +
+		MemoryLayout.size(ofValue: self.rawType) +
+		MemoryLayout.size(ofValue: self.position)
+		
+		size += frames.reduce(0) { $0 + $1.sizeInBytes }
+		return size
+	}
+}
+
+extension FrameSkinFrame {
+	var sizeInBytes: Int {
+		let size = MemoryLayout.size(ofValue: self.id) +
+		MemoryLayout.size(ofValue: self.frameIndex) +
+		(frameData?.count ?? 0) +
+		(drawingData?.count ?? 0)
+		return size
+	}
+}
+

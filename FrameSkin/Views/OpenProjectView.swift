@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct OpenProjectView: View {
-	var project: FrameSkinProject
-	var realmManager: RealmManager
+	@ObservedObject var project: FrameSkinProject
+	@ObservedObject var realmManager: RealmManager
 	var shortcutManager: ShortcutManager
 	@Binding var logs: [String]
 	@State internal var selectedFrameImage: UIImage?
@@ -11,7 +11,7 @@ struct OpenProjectView: View {
 	@State internal var currentTrackIndex: Int = 0
 	@State internal var currentFrameIndex: Int = 0
 	@State internal var tracks: [FrameSkinTrack] = []
-	@State internal var frameImages: [UIImage] = []
+//	@State internal var frameImages: [UIImage] = []
 	@State internal var isPlaying: Bool = false
 	@State internal var timer: Timer?
 	@State internal var showingSettings = false
@@ -70,7 +70,7 @@ struct OpenProjectView: View {
 				}
 			}
 		)
-		.navigationBarTitle("FrameSkin", displayMode: .inline)
+		.navigationBarTitle("FrameSkin \(project.title)", displayMode: .inline)
 		.navigationBarItems(leading: Button(action: {
 			showingSettings.toggle()
 		}) {

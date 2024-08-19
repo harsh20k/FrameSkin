@@ -12,19 +12,34 @@ struct ContentView: View {
 	var body: some View {
 		
 		NavigationStack(path: $path.animation()) {
-			
-			ForEach(realmManager.projects, id: \.self){ project in
-				VStack {
-					NavigationLink("Project: \(project.title)", value: 3)
-					HStack {
-						Text ("\(project.createdDate) \(project.lastModifiedDate) ")
+			VStack{
+				ForEach(realmManager.projects, id: \.self){ project in
+					VStack {
+						NavigationLink {
+							OpenProjectView(project: project, realmManager: realmManager, shortcutManager: shortcutManager, logs: $logs)
+						} label: {
+							HStack{
+								Text("Project: \(project.title)")
+								Text("\(project.createdDate.formatted()) \(project.lastModifiedDate.formatted())")
+									.padding()
+							}
+						}
 					}
 				}
-				.navigationDestination(for: Int.self) { value in
-					OpenProjectView(project: project, realmManager: realmManager, shortcutManager: shortcutManager, logs: $logs)
+				.toolbar { Spacer() }
+				Spacer()
+				HStack{
+					Text("Delete \(realmManager.projects.count) projects")
+					Button {
+						realmManager.deleteAllProjects()
+					} label: {
+						Image(systemName: "xmark.bin.fill")
+							.foregroundStyle(Color.red.opacity(0.7))
+							.padding()
+					}
+
 				}
 			}
-			.toolbar { Spacer() }
 		}
 	}
 
