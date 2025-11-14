@@ -47,8 +47,10 @@ class ShortcutManager: ObservableObject {
         guard let shortcut = shortcuts[action] else { return KeyEquivalent(" ") }
         switch shortcut {
         case "space": return KeyEquivalent(" ")
-        case "rightArrow": return KeyEquivalent.rightArrow
+		case "rightArrow": return KeyEquivalent.rightArrow
+		case "x": return KeyEquivalent.rightArrow
         case "leftArrow": return KeyEquivalent.leftArrow
+		case "z": return KeyEquivalent.leftArrow
         default: return KeyEquivalent(Character(shortcut))
         }
     }
